@@ -6,5 +6,6 @@ The goal is to create a simple, relatively easy to use reference list creator to
 
 - [X] Make the script read the links
 - [ ] Make the script go through a link, retrieve the correct information for a reference, and then output it
+  - [ ] This will be done by retrieving a DOI when possible, and when a DOI isn't available it should retrieve the reference info by other means
 - [ ] Make the script output the finished list of all the references into a txt file. 
 - [ ] When finished, maybe make it even output the reference list to a word file and correctly format everything.
