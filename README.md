@@ -4,7 +4,7 @@ The goal is to create a simple, relatively easy to use reference list creator to
 
 # Roadmap
 
-- [ ] Make the script read the links
+- [X] Make the script read the links
 - [ ] Make the script go through a link, retrieve the correct information for a reference, and then output it
 - [ ] Make the script output the finished list of all the references into a txt file. 
 - [ ] When finished, maybe make it even output the reference list to a word file and correctly format everything.
