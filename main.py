@@ -2,6 +2,9 @@ import os
 import json
 import requests
 from bs4 import BeautifulSoup
+import re
+
+DOI_RE = re.compile(r"(10\.\d{4,9}/[^\s\"<>]+)", re.I)
 #read input.txt and output an alphabetically ordered list without potential fluff.
 def readtxt(file):
     cwd = os.getcwd()
@@ -14,50 +17,26 @@ def readtxt(file):
 #try to get the DOI
 def getDOI(url):
     meta_names = ["citation_doi", "publication_doi","dc.Identifier"]
-    out = None
-    if "/doi/" in url:
-        url = url.split("/doi/",1)
-        return url[1]
-    html = requests.get(url).text
-    soup = BeautifulSoup(html, "html.parser")
-    for i in meta_names:
-        meta = soup.find("meta", attrs={"name": i})
-        if meta:
-            return meta["content"].strip()  
-    scripts = soup.find_all("script", type="application/ld+json")
-    return ''.join([x for x in [DOIfrom_schemaorg(script) for script in scripts]])
-def DOIfrom_schemaorg(script):
-    try:
-        data = json.loads(script.string)
-    except Exception:
-        pass
-    if isinstance(data, list):
-            for item in data:
-                doi = extract_doi(item)
-                if doi:
-                    return doi
+    out = DOI_RE.search(url)
+    if out:
+        return out.group(1)
     else:
-        doi = extract_doi(data)
-        if doi:
-            return doi
-    return None
-
-def extract_doi(data):
-    if not isinstance(data, dict):
-        return None
-
-    # Common DOI locations
-    if data.get("@type") == "ScholarlyArticle":
-        identifier = data.get("identifier")
-        if isinstance(identifier, dict):
-            if identifier.get("propertyID", "").lower() == "doi":
-                return identifier.get("value")
-
-        if "doi" in data:
-            return data["doi"]
-
-    return None
-
+        html = requests.get(url,
+            headers={"User-Agent": "DOI-finder/1.0"},
+            timeout=20).text
+        soup = BeautifulSoup(html, "html.parser")
+        if soup.head:
+            headtext = soup.head.getText(" ",strip=True)
+            out = DOI_RE.search(str(headtext))
+    if out:
+        return out.group(1)
+    #for i in meta_names:
+    #    meta = soup.find("meta", attrs={"name": i})
+    #    if meta:
+    #        return meta["content"].strip() 
+    #    meta =  soup.find("meta", attrs={"property": i})
+    #    if meta:
+    #        return meta["content"].strip()
 DOI_list = []
 url_list = readtxt("input")
 ref_list = []
